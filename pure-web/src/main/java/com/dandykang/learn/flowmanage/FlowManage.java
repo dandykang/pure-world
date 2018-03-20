@@ -2,11 +2,14 @@ package com.dandykang.learn.flowmanage;
 
 import com.dandykang.learn.common.spring.SpringContext;
 import com.dandykang.learn.flowmanage.handler.IHandler;
+import com.dandykang.learn.flowmanage.handler.StartHandler;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,15 +23,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FlowManage {
     public static final Logger logger = LoggerFactory.getLogger(FlowManage.class);
 
+    @Autowired
+    StartHandler startHandler;
+
     private Map<String, Map<String, HandlerProperty>> handlerMap = new ConcurrentHashMap<>();
 
 
     @PostConstruct
     public void initHandler(){
+        logger.info("load handler");
         Map<String, Map<String, HandlerProperty>> handlerMapTmp = new ConcurrentHashMap<>();
 
         Map<String, HandlerProperty> handlerPropertyMap = new HashMap<>();
-        registHandler(handlerPropertyMap, (IHandler) SpringContext.getBean("startHandler"), 1);
+        registHandler(handlerPropertyMap, this.startHandler, 1);
 
         LinkedHashMap sortedMap = new LinkedHashMap();
         ArrayList<Map.Entry<String, HandlerProperty>> entryList = new ArrayList(handlerPropertyMap.entrySet());
@@ -41,8 +48,9 @@ public class FlowManage {
             sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());
             handlerOrder.append(tmpEntry.getKey()).append(" ");
         }
+        // TODO: 2018/3/20 这里是临时放入一个唯一id，表示找到一个handlerMap
         handlerMapTmp.put("uniqueId", sortedMap);
-        logger.info("hander order is : ", handlerOrder);
+        logger.info("hander order is :{} ", handlerOrder);
 
         this.handlerMap = handlerMapTmp;
     }
@@ -98,5 +106,9 @@ public class FlowManage {
                 return true;
             }
         }
+    }
+
+    public Map<String, HandlerProperty> getHandlerMap(String uniqueId){
+        return handlerMap.get(uniqueId);
     }
 }

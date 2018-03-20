@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <!-- 使用注解方式完成映射 -->
+    <!-- 让扫描spring扫描这个包下所有的类，让标注spring注解的类生效 -->
+    <context:component-scan base-package="com.dandykang.learn.controller"/>
+
+
+    <!-- 是否加载静态资源{打开是不处理静态资源}-->
+    <mvc:default-servlet-handler/>
+
+
+    <mvc:annotation-driven><!-- 开启注解 -->
+        <mvc:message-converters>
+            <bean  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+            <property name="supportedMediaTypes">
+                <list>
+                    <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                    <value>text/html;charset=UTF-8</value>
+                    <value>application/json;charset=UTF-8</value>
+                </list>
+            </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+
+    <!-- 视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
 </beans>
